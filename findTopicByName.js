@@ -13,7 +13,19 @@ const findTopicByName = (arr, target) => {
 }
 
 let topicObj = findTopicByName(abiArr, 'Birth')
+let topicInputs = topicObj.inputs
 let topicHex = web3.eth.abi.encodeEventSignature(topicObj)
-console.log(topicHex)
 
 // Birth is 0x0a5311bd2a6608f08a180df2ee7c5946819a649b204b554bb8e39825b2c50ad5
+
+let topicObjGetKitty = findTopicByName(abiArr, 'getKitty')
+let topicInputsGetKitty = topicObjGetKitty.inputs
+let topicHexGetKitty = web3.eth.abi.encodeFunctionCall(topicObjGetKitty, [20])
+
+
+module.exports = {
+  topicHex,
+  topicInputs,
+  topicHexGetKitty,
+  topicInputsGetKitty
+}

@@ -1,48 +1,13 @@
 const axios = require('axios');
-const PROJECT_ID = require('./secrets.js');
 
 var Web3 = require('web3');
 // "Web3.providers.givenProvider" will be set if in an Ethereum supported browser.
 var web3 = new Web3(Web3.givenProvider || 'ws://some.local-or-remote.node:8546');
 
+const PROJECT_ID = require('./secrets.js').PROJECT_ID;
+const topicInfo = require('./findTopicByName.js');
 const endpoint = `https://mainnet.infura.io/v3/${PROJECT_ID}`;
-
-
-const birthEventInputs = [
-  {
-    "indexed": false,
-    "name": "owner",
-    "type": "address"
-  },
-  {
-    "indexed": false,
-    "name": "kittyId",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "name": "matronId",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "name": "sireId",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "name": "genes",
-    "type": "uint256"
-  }
-]
-
-const birthEventTopic = web3.eth.abi.encodeEventSignature({
-  "anonymous": false,
-  "inputs": birthEventInputs,
-  "name": "Birth",
-  "type": "event"
-});
-
+const contract = '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d'; // address for cryptokitties
 
 const getLogs = (topic, startBlock, endBlock, countsOfBirthsByMatron) => {
   axios({
@@ -52,7 +17,7 @@ const getLogs = (topic, startBlock, endBlock, countsOfBirthsByMatron) => {
       jsonrpc: '2.0',
       method: 'eth_getLogs',
       params: [{
-        address: '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d', // address for cryptokitties
+        address: contract,
         topics: [topic],
         fromBlock: startBlock,
         toBlock: endBlock
@@ -63,13 +28,8 @@ const getLogs = (topic, startBlock, endBlock, countsOfBirthsByMatron) => {
       'Content-Type': 'application/json',
     }
   }).then((response) => {
-    if (response === undefined) {
-      console.log('no response received')
-    } else {
-      let results = response.data.result;
-      countBirthsFromLog(results, [topic], countsOfBirthsByMatron)
-//      console.log(maxBirths)
-    }
+    let results = response.data.result;
+    countBirthsFromLog(results, [topic], countsOfBirthsByMatron)
   }).catch((error) => {
     console.log('error', error);
     getLogs(topic, startBlock, startBlock + (endBlock - startBlock) / 2, countsOfBirthsByMatron)
@@ -77,13 +37,36 @@ const getLogs = (topic, startBlock, endBlock, countsOfBirthsByMatron) => {
   })
 }
 
-
-let countsOfBirthsByMatron = {}
-let maxBirths = {
-  matronId: null,
-  maxBirths: 0
+const countBirthsFromLog = (results, topics, countsOfBirthsByMatron) => {
+  if (results === undefined) {
+    console.log('No births here')
+    return
+  }
+  results.forEach((block) => {
+    birthResults.totalBirths++
+    let matron = web3.eth.abi.decodeLog(topicInfo.topicInputs, block.data, [topicInfo.topicHex]).matronId
+    if (matron === '0') { // gen0 kitties have no matron
+      return
+    } else if (countsOfBirthsByMatron[matron] === undefined) {
+      countsOfBirthsByMatron[matron] = 1
+    } else {
+      countsOfBirthsByMatron[matron]++
+    }
+    if (countsOfBirthsByMatron[matron] > birthResults.maxBirths) {
+      birthResults.maxBirths = countsOfBirthsByMatron[matron]
+      birthResults.maxMatronId = matron
+    }
+  })
+  console.log('Current maxBirth', birthResults)
 }
 
+
+let countsOfBirthsByMatron = {}
+let birthResults = {
+  maxMatronId: null,
+  maxBirths: 0,
+  totalBirths: 0
+}
 
 const start = 6607985;
 const end = 7028323;
@@ -95,47 +78,9 @@ const turnIntToHex = (integer) => {
 }
 
 const callGetLogs = async () => {
-
   for (let i = start; i <= end; i += interval) {
-    await getLogs(birthEventTopic, turnIntToHex(i), turnIntToHex(i + interval - 1), countsOfBirthsByMatron)
+    await getLogs(topicInfo.topicHex, turnIntToHex(i), turnIntToHex(i + interval - 1), countsOfBirthsByMatron)
   }
-
-  return maxBirths;
-
+  return birthResults;
 }
-callGetLogs().then((result) => {console.log(result)})
-
-
-
-// let promises = []
-
-// for (let i = start; i <= end; i += interval) {
-//   promises.push(getLogs(birthEventTopic, turnIntToHex(i), turnIntToHex(i + interval), countsOfBirthsByMatron))
-// }
-
-// Promise.all(promises).then(() => console.log('finalmax', maxBirths))
-
-// getLogs(birthEventTopic, turnIntToHex(start), turnIntToHex(start + interval), countsOfBirthsByMatron)
-
-
-const countBirthsFromLog = (results, topics, countsOfBirthsByMatron) => {
-  if (results === undefined) {
-    console.log('No births here')
-    return
-  }
-  results.forEach((block) => {
-    let matron = web3.eth.abi.decodeLog(birthEventInputs, block.data, topics).matronId
-    if (matron === '0') { // gen0 kitties have no matron
-      return
-    } else if (countsOfBirthsByMatron[matron] === undefined) {
-      countsOfBirthsByMatron[matron] = 1
-    } else {
-      countsOfBirthsByMatron[matron]++
-    }
-    if (countsOfBirthsByMatron[matron] > maxBirths.maxBirths) {
-      maxBirths.maxBirths = countsOfBirthsByMatron[matron]
-      maxBirths.matronId = matron
-    }
-  })
-  console.log('Log counted!')
-}
+callGetLogs().then((result) => { console.log(result) })
