@@ -11,11 +11,31 @@ const getKittyInfo = require('./getKittyInfo.js').getKittyInfo;
 const start = 6607985;
 const end = 7028323;
 
-const getTotalBirths = async (start, end) => {
-  let result = await reviewBirths(start, end)
+const getTotalBirthsAndBigMomma = async (start, end) => {
+  let reviewedBirths = await reviewBirths(start, end)
+  let bigMomma = await getKittyInfo(reviewedBirths.maxMatronId)
 
-  return result.totalBirths;
+  let result = {
+    totalBirths: reviewedBirths.totalBirths,
+    bigMomma: {
+      id: reviewedBirths.maxMatronId,
+      ...bigMomma
+    }
+  }
+
+  return result;
 }
 
-let totalBirths = await getTotalBirths(start, end)
-let bigMomma = await getKittyInfo(totalBirths)
+(async () => {
+  let finalAnswer = await getTotalBirthsAndBigMomma(start, end)
+  console.log(finalAnswer)
+})();
+
+/*
+{ totalBirths: 177843,
+  bigMomma:
+   { id: '1083637',
+     birthTime: '1539134711',
+     generation: '0',
+     genes: '467882257905024579446667743955452078189962217938379332103542434935342116' } }
+*/

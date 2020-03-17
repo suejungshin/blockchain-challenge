@@ -1,7 +1,5 @@
 const axios = require('axios');
-
 var Web3 = require('web3');
-// "Web3.providers.givenProvider" will be set if in an Ethereum supported browser.
 var web3 = new Web3(Web3.givenProvider || 'ws://some.local-or-remote.node:8546');
 
 const PROJECT_ID = require('./secrets.js').PROJECT_ID;
@@ -37,7 +35,6 @@ const getKittyInfo = (id) => {
       generation: data.generation,
       genes: data.genes
     }
-    console.log('kitty info by id', result)
     return result;
   }).catch((error) => {
     console.log('error', error);
@@ -47,5 +44,3 @@ const getKittyInfo = (id) => {
 module.exports = {
   getKittyInfo
 }
-
-getKittyInfo(1083637)
