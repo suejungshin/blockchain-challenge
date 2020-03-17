@@ -5,12 +5,16 @@ var Web3 = require('web3');
 var web3 = new Web3(Web3.givenProvider || 'ws://some.local-or-remote.node:8546');
 
 const PROJECT_ID = require('./secrets.js').PROJECT_ID;
-const topicInfo = require('./findTopicByName.js');
 const endpoint = `https://mainnet.infura.io/v3/${PROJECT_ID}`;
 const contract = '0x06012c8cf97BEaD5deAe237070F9587f8E7A266d'; // address for cryptokitties
 
-const getKittyInfo = () => {
-  axios({
+const helpers = require('./helpers.js');
+
+const getKittyInfo = (id) => {
+  let topicObjGetKitty = helpers.findTopicByName('getKitty')
+  let topicHexGetKitty = web3.eth.abi.encodeFunctionCall(topicObjGetKitty, [id])
+
+  return axios({
     method: 'post',
     url: endpoint,
     data: JSON.stringify({
@@ -18,7 +22,7 @@ const getKittyInfo = () => {
       method: 'eth_call',
       params: [{
         to: contract,
-        data: topicInfo.topicHexGetKitty,
+        data: topicHexGetKitty,
       }, 'latest'],
       id: 1
     }),
@@ -26,54 +30,22 @@ const getKittyInfo = () => {
       'Content-Type': 'application/json',
     }
   }).then((response) => {
-    console.log(response)
-    let result = web3.eth.abi.decodeParameters([
-      {
-        "name": "isGestating",
-        "type": "bool"
-      },
-      {
-        "name": "isReady",
-        "type": "bool"
-      },
-      {
-        "name": "cooldownIndex",
-        "type": "uint256"
-      },
-      {
-        "name": "nextActionAt",
-        "type": "uint256"
-      },
-      {
-        "name": "siringWithId",
-        "type": "uint256"
-      },
-      {
-        "name": "birthTime",
-        "type": "uint256"
-      },
-      {
-        "name": "matronId",
-        "type": "uint256"
-      },
-      {
-        "name": "sireId",
-        "type": "uint256"
-      },
-      {
-        "name": "generation",
-        "type": "uint256"
-      },
-      {
-        "name": "genes",
-        "type": "uint256"
-      }
-    ], response.data.result);
-    console.log(result)
-
+    let outputs = helpers.findTopicByName('getKitty').outputs
+    let data = web3.eth.abi.decodeParameters(outputs, response.data.result);
+    let result = {
+      birthTime: data.birthTime,
+      generation: data.generation,
+      genes: data.genes
+    }
+    console.log('kitty info by id', result)
+    return result;
   }).catch((error) => {
     console.log('error', error);
   })
 }
 
-console.log(getKittyInfo())
+module.exports = {
+  getKittyInfo
+}
+
+getKittyInfo(1083637)
