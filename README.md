@@ -11,16 +11,16 @@ Then
 `npm install`
 `npm start`
 
-Find Big “CryptoKitty” Momma
-This should be fun exercise that will help you learn some basic blockchain concepts if you are new to them.
-CryptoKitties is a blockchain-based game developed by Axiom Zen that allows players to purchase, collect, breed and sell various types of digital kitties. Your objective is to build a program that takes a startingBlock and endingBlock as arguments and counts the total number of births that happened during that range. Finally, use that information to find the Kitty (birth timestamp, generation and their genes) that gave birth to the most kitties.
-Email us at maker@makersplace.com with the answer using startingBlock=6607985 and endingBlock=7028323, along with the source code and we promise to respond immediately!
-Tips
-You will need a copy of the Ethereum blockchain.
-Setting up an Ethereum node and geth can be tedious, so feel free to use Infura an Ethereum blockchain service.
-You will run into few challenges with Infura when asking for a huge dataset, so get creative!
-Here is the CryptoKitties contract address and their code. The ABI’s and API’s are available in that link.
-Helpful Articles
+## Find Big “CryptoKitty” Momma
+This should be fun exercise that will help you learn some basic blockchain concepts if you are new to them.<br>
+CryptoKitties is a blockchain-based game developed by Axiom Zen that allows players to purchase, collect, breed and sell various types of digital kitties. Your objective is to build a program that takes a startingBlock and endingBlock as arguments and counts the total number of births that happened during that range. Finally, use that information to find the Kitty (birth timestamp, generation and their genes) that gave birth to the most kitties.<br>
+Find the answer using startingBlock=6607985 and endingBlock=7028323 <br>
+### Tips
+You will need a copy of the Ethereum blockchain.<br>
+Setting up an Ethereum node and geth can be tedious, so feel free to use Infura an Ethereum blockchain service. <br>
+You will run into few challenges with Infura when asking for a huge dataset, so get creative! <br>
+Here is the CryptoKitties contract address and their code. The ABI’s and API’s are available in that link. https://etherscan.io/address/0x06012c8cf97bead5deae237070f9587f8e7a266d#code <br>
+### Helpful Articles
 Here are a few articles to help you understand some Ethereum concepts:
 https://hackernoon.com/understanding-ethereum-a-complete-guide-6f32ea8f5888
 https://media.consensys.net/technical-introduction-to-events-and-logs-in-ethereum-a074d65dd61e
